@@ -48,7 +48,7 @@ public class UserController {
         log.info("Пользователь с таким id = {} успешно обновлен", newUser.getId());
         return newUser;
     }
-    // email, login, name, birthday
+
     private void userValidation(User user) {
             if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
                 log.warn("Название почты не должно быть пустым и должно содержать @");
