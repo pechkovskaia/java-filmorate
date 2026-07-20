@@ -22,6 +22,7 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
+        log.info("Запрос на получение списка всех пользователей получен");
         return users.values();
     }
 
@@ -57,6 +58,10 @@ public class UserController {
             if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
                 log.warn("Логин не должен быть пуст и не должен содержать пробелы");
                 throw new ValidationException("Логин не может быть пуст или содержать пробелы");
+            }
+            if (user.getBirthday() == null) {
+                log.warn("Дата дня рождения не может быть пустой");
+                throw new ValidationException("Дата дня рождения не может быть пустой");
             }
             if (user.getName() == null || user.getName().isBlank()) {
                 log.info("Имя не указано, будет использован логин: {}", user.getLogin());

@@ -21,6 +21,7 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
+        log.info("Запрос на получение списка всех фильмов получен");
         return films.values();
     }
 
@@ -56,6 +57,10 @@ public class FilmController {
         if (film.getDescription() != null && film.getDescription().length() > 200) {
             log.warn("Вы превысили максимальную длину описания: 200 символов");
             throw new ValidationException("Максимальная длина описания — 200 символов");
+        }
+        if (film.getReleaseDate() == null) {
+            log.warn("Дата выхода фильма не может быть пустой");
+            throw new ValidationException("Дата выхода фильма не может быть пустой");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.warn("Дата выпуска фильма должна быть не раньше 28/12/1895");
