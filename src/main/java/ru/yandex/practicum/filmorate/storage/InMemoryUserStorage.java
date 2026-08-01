@@ -13,41 +13,41 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Collection<User> findAll() {
-            return new ArrayList<>(users.values());
-        }
+        return new ArrayList<>(users.values());
+    }
 
-        @Override
-        public User findById(int id) {
+    @Override
+    public User findById(int id) {
         User user = users.get(id);
         if (user == null) {
-            throw new NotFoundException("Пользователь с id = " + id + "не найден");
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
         }
-            return user;
+        return user;
+    }
+
+    @Override
+    public User create(User user) {
+        user.setId(getNextId());
+        users.put(user.getId(), user);
+        return user;
+    }
+
+    @Override
+    public User update(User newUser) {
+        if (!users.containsKey(newUser.getId())) {
+            throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
         }
+        users.put(newUser.getId(), newUser);
+        return newUser;
+    }
 
-        @Override
-            public User create (User user) {
-            user.setId(getNextId());
-            users.put(user.getId(), user);
-            return user;
+    @Override
+    public void delete(int id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException("Пользователь с id = " + id + " не найден");
         }
-
-        @Override
-            public User update (User newUser) {
-                if (!users.containsKey(newUser.getId())) {
-                    throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
-                }
-                users.put(newUser.getId(), newUser);
-                return newUser;
-            }
-
-            @Override
-            public void delete(int id) {
-                if (!users.containsKey(id)) {
-                    throw new NotFoundException("Пользователь с id = " + id + " не найден");
-                }
-                users.remove(id);
-            }
+        users.remove(id);
+    }
 
     @Override
     public void addFriend(int userId, int friendId) {
@@ -86,7 +86,7 @@ public class InMemoryUserStorage implements UserStorage {
         return new ArrayList<>(user.getFriends());
     }
 
-    private int getNextId () {
-                return ++currentId;
-            }
-        }
+    private int getNextId() {
+        return ++currentId;
+    }
+}
