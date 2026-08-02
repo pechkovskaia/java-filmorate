@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -17,12 +17,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findById(int id) {
-        Film film = films.get(id);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден");
-        }
-        return film;
+    public Optional<Film> findById(int id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
@@ -34,41 +30,31 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film newFilm) {
-        if (!films.containsKey(newFilm.getId())) {
-            throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
-        }
         films.put(newFilm.getId(), newFilm);
         return newFilm;
     }
 
     @Override
     public void delete(int id) {
-        if (!films.containsKey(id)) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден");
-        }
         films.remove(id);
     }
 
     @Override
     public void addLike(int filmId, int userId) {
-        Film film = films.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
-        }
-
-        Set<Integer> likes = film.getLikes();
-        likes.add(userId);
+        films.get(filmId).getLikes().add(userId);
     }
 
     @Override
     public void removeLike(int filmId, int userId) {
-        Film film = films.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм с id = " + filmId + " не найден");
-        }
+        films.get(filmId).getLikes().remove(Integer.valueOf(userId));
+    }
 
-        Set<Integer> likes = film.getLikes();
-        likes.remove(Integer.valueOf(userId));
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        return films.values().stream()
+                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private int getNextId() {

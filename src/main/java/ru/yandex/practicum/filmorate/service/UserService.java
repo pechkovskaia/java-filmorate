@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -32,7 +33,8 @@ public class UserService {
 
     public User findById(int id) {
         log.info("Запрос на получение пользователя с id = {}", id);
-        return userStorage.findById(id);
+        return userStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
     }
 
     public User create(User user) {
@@ -43,6 +45,9 @@ public class UserService {
     }
 
     public User update(User newUser) {
+        userStorage.findById(newUser.getId())
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден"));
+
         userValidation(newUser);
         User updated = userStorage.update(newUser);
         log.info("Пользователь с id = {} успешно обновлен", updated.getId());
@@ -50,6 +55,9 @@ public class UserService {
     }
 
     public void delete(int id) {
+        userStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+
         userStorage.delete(id);
         log.info("Пользователь с id = {} успешно удалён", id);
     }
@@ -59,8 +67,10 @@ public class UserService {
             throw new ValidationException("Пользователь не может добавить самого себя в друзья");
         }
 
-        userStorage.findById(userId);
-        userStorage.findById(friendId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+        userStorage.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + friendId + " не найден"));
 
         userStorage.addFriend(userId, friendId);
         userStorage.addFriend(friendId, userId);
@@ -68,8 +78,10 @@ public class UserService {
     }
 
     public void removeFriend(int userId, int friendId) {
-        userStorage.findById(userId);
-        userStorage.findById(friendId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
+        userStorage.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + friendId + " не найден"));
 
         userStorage.removeFriend(userId, friendId);
         userStorage.removeFriend(friendId, userId);
@@ -77,17 +89,15 @@ public class UserService {
     }
 
     public List<User> getFriends(int userId) {
-        userStorage.findById(userId);
         log.info("Запрос на получение списка друзей пользователя с id = {}", userId);
 
         return userStorage.getFriends(userId).stream()
-                .map(userStorage::findById)
+                .map(id -> userStorage.findById(id)
+                        .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден")))
                 .collect(Collectors.toList());
     }
 
     public List<User> getCommonFriends(int userId1, int userId2) {
-        userStorage.findById(userId1);
-        userStorage.findById(userId2);
         log.info("Запрос на получение общих друзей пользователей с id = {} и id = {}", userId1, userId2);
 
         Set<Integer> friends1 = Set.copyOf(userStorage.getFriends(userId1));
@@ -99,7 +109,8 @@ public class UserService {
 
         List<User> commonUsers = new ArrayList<>();
         for (Integer id : commonIds) {
-            commonUsers.add(userStorage.findById(id));
+            commonUsers.add(userStorage.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден")));
         }
         return commonUsers;
     }

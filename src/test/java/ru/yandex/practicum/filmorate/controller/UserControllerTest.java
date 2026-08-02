@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserControllerTest {
 
-    // тесты: почта пустая или без @, логин пуст и содержит пробелы, имя не указано - должно занятся логином, дата рождения в будущем, тест когда все заполнено правильно,
+
     private UserController userController;
 
     @BeforeEach
