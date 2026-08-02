@@ -63,6 +63,8 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
+        filmStorage.findById(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         filmStorage.addLike(filmId, userId);
@@ -70,6 +72,8 @@ public class FilmService {
     }
 
     public void removeLike(int filmId, int userId) {
+        filmStorage.findById(filmId)
+                .orElseThrow(() -> new NotFoundException("Фильм с id = " + filmId + " не найден"));
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         filmStorage.removeLike(filmId, userId);

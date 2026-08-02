@@ -89,6 +89,8 @@ public class UserService {
     }
 
     public List<User> getFriends(int userId) {
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
         log.info("Запрос на получение списка друзей пользователя с id = {}", userId);
 
         return userStorage.getFriends(userId).stream()
