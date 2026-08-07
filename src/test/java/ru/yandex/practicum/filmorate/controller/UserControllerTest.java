@@ -4,6 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
@@ -13,12 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserControllerTest {
 
-    // тесты: почта пустая или без @, логин пуст и содержит пробелы, имя не укзано - должно заняться логином, дата рождения в будущем, тест когда все заполнено правильно,
+
     private UserController userController;
 
     @BeforeEach
     void setUp() {
-        userController = new UserController();
+        // собираем всю цепочку зависимостей вручную,
+        // так как Spring в юнит-тесте не создаёт бины сам
+        UserStorage userStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(userStorage);
+        userController = new UserController(userService);
     }
 
     @Test
@@ -100,6 +108,7 @@ public class UserControllerTest {
         assertThrows(ValidationException.class, () -> userController.create(user));
     }
 
+    @Test
     void shouldPassWhenBirthdayIsToday() {
         User user = new User();
         user.setEmail("dariap@mail.ru");
@@ -110,5 +119,4 @@ public class UserControllerTest {
         assertDoesNotThrow(() -> userController.create(user));
     }
 }
-
 
